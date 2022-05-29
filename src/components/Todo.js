@@ -33,6 +33,7 @@ class ToDo extends Component {
         // Binding this keyword
         this.handleSignMessage = this.handleSignMessage.bind(this)
         this.handleClick = this.handleClick.bind(this)
+        this.fileToByteArray = this.fileToByteArray.bind(this)
 
     }
 
@@ -289,6 +290,35 @@ class ToDo extends Component {
 
     };
 
+    fileToByteArray(file) {
+        return new Promise((resolve, reject) => {
+            try {
+                let reader = new FileReader();
+                let fileByteArray = [];
+                reader.readAsArrayBuffer(file);
+                reader.onloadend = (evt) => {
+                    if (evt.target.readyState == FileReader.DONE) {
+                        let arrayBuffer = evt.target.result
+                        console.log("arrayBuffer")
+                        console.log(arrayBuffer)
+                        console.log(typeof arrayBuffer)
+                        let array = new Uint8Array(arrayBuffer);
+
+                        console.log("array")
+                        console.log(array)
+                        for (const hh of array) {
+                            fileByteArray.push(hh);
+                        }
+                    }
+                    resolve(fileByteArray);
+                }
+            }
+            catch (e) {
+                reject(e);
+            }
+        })
+    }
+
     render() {
         return (
             <div>
@@ -306,6 +336,34 @@ class ToDo extends Component {
                 <button onClick={this.handleLogout}>
                     Logout
                 </button>
+
+                <input type="file" id="files" name="files" multiple onChange={async (e) => {
+                    console.log(" choodes")
+
+                    let file = e.target.files[0]
+                    console.log(file.name)
+                    console.log(file)
+
+                    let byteArray = await this.fileToByteArray(file)
+                    // var path = (window.URL || window.webkitURL).createObjectURL(file);
+                    console.log('byteArray', byteArray);
+
+                    try {
+
+
+                        const fileParse = new Parse.File('largeFIle.mp4', byteArray, 'video/mp4');
+
+                        const result = await fileParse.save();
+
+                        console.log('result: ', result);
+
+                    } catch (error) {
+                        console.error('error: ', error);
+                    }
+
+
+
+                }}></input>
             </div >
         )
     }
